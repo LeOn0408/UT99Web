@@ -1,0 +1,9 @@
+; Тестовая фикстура, не игровые данные
+[UTMenu.Menu]
+Play=Play
+Options=Options
+Quit=Quit
+
+[UTMenu.Settings]
+Video=Video
+Audio=Audio

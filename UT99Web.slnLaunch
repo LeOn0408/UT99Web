@@ -1,0 +1,8 @@
+﻿[
+  {
+    "Name": "UT99Web",
+    "Projects": [
+      { "Path": "UT99Web.Server\\UT99Web.Server.csproj", "Action": "Start" }
+    ]
+  }
+]

@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="web\**\*" />
+    <None Include="engine\**\*" />
+    <None Include="tools\**\*" />
+    <None Include="localization\**\*" />
+    <None Include="package.json" />
+    <None Include="package-lock.json" />
+    <None Include="server.mjs" />
+  </ItemGroup>
+</Project>

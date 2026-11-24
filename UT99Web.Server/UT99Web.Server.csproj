@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\UT99Web.Frontend\web\**\*" Link="Frontend\web\%(RecursiveDir)%(Filename)%(Extension)" />
+    <None Include="..\UT99Web.Frontend\engine\**\*" Link="Frontend\engine\%(RecursiveDir)%(Filename)%(Extension)" />
+    <None Include="..\UT99Web.Frontend\tools\**\*" Link="Frontend\tools\%(RecursiveDir)%(Filename)%(Extension)" />
+    <None Include="..\UT99Web.Frontend\localization\**\*" Link="Frontend\localization\%(RecursiveDir)%(Filename)%(Extension)" />
+    <None Include="..\UT99Web.Frontend\package.json" Link="Frontend\package.json" />
+    <None Include="..\UT99Web.Frontend\server.mjs" Link="Frontend\server.mjs" />
+  </ItemGroup>
+
+</Project>

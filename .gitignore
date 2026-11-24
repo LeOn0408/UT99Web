@@ -1,0 +1,42 @@
+# Игровые данные и сборочные артефакты
+UT99Web.Frontend/assets/game/
+UT99Web.Frontend/assets/cache/
+UT99Web.Frontend/engine/build/
+UT99Web.Frontend/web/dist/
+node_modules/
+*.log
+*.tmp
+
+# Локальные дистрибутивы и образы
+*.iso
+*.zip
+*.7z
+*.rar
+
+# ASP.NET Core
+UT99Web.Server/**/bin/
+UT99Web.Server/**/obj/
+UT99Web.Frontend/**/bin/
+UT99Web.Frontend/**/obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Native port spike (локальные материалы Epic, в git не входят)
+UT99Web.Frontend/engine/native/build-wasm/
+UT99Web.Frontend/engine/native/ut99pubsrc/
+
+# Node frontend
+UT99Web.Frontend/node_modules/
+
+# .NET server
+UT99Web.Server/bin/
+UT99Web.Server/obj/
+UT99Web.Frontend.Launcher/bin/
+UT99Web.Frontend.Launcher/obj/
+
+# Рабочие заметки и инструкции для агентов — в публикацию не идут
+tasks/
+AGENTS.md

@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UT99 Web — концепт интерфейса</title>
+  <style>
+    :root {
+      --ink: #07090e;
+      --ink-2: #0c1119;
+      --panel: #111720;
+      --panel-2: #171f2b;
+      --line: rgba(195, 208, 224, 0.14);
+      --line-strong: rgba(224, 180, 78, 0.42);
+      --paper: #e9e3d4;
+      --muted: #8996a8;
+      --sand: #e3b34a;
+      --sand-soft: rgba(227, 179, 74, 0.14);
+      --ember: #d9542f;
+      --ice: #69d6cf;
+      --font-display: "Bahnschrift Condensed", "Arial Narrow", "Franklin Gothic Medium", sans-serif;
+      --font-body: "Bahnschrift", "Segoe UI", system-ui, sans-serif;
+      --font-data: "Consolas", "Cascadia Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      color: var(--paper);
+      font-family: var(--font-body);
+      background:
+        radial-gradient(900px 540px at 72% -6%, rgba(105, 214, 207, 0.10), transparent 62%),
+        radial-gradient(800px 500px at 18% 106%, rgba(217, 84, 47, 0.12), transparent 60%),
+        linear-gradient(145deg, #0a0d14 0%, #07090e 55%, #05070b 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(188, 205, 224, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(188, 205, 224, 0.035) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,0.9), transparent 80%);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.16;
+      background: repeating-linear-gradient(115deg, transparent 0 68px, rgba(227, 179, 74, 0.16) 68px 69px);
+      mask-image: radial-gradient(900px 600px at 76% 34%, #000 0%, transparent 75%);
+    }
+
+    button, input { font: inherit; }
+    button { color: inherit; }
+    a { color: inherit; }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 212px minmax(0, 1fr) 304px;
+      grid-template-rows: 56px minmax(0, 1fr) 46px;
+      height: 100vh;
+      min-height: 660px;
+    }
+
+    /* ---------------------------------------------------------- top rail */
+
+    .top {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      padding: 0 22px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(17, 23, 32, 0.92), rgba(9, 13, 19, 0.72));
+      backdrop-filter: blur(10px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 190px;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      color: #120e06;
+      background: var(--sand);
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.06em;
+      clip-path: polygon(0 0, 100% 0, 100% 74%, 76% 100%, 0 100%);
+      box-shadow: 0 0 26px rgba(227, 179, 74, 0.28);
+    }
+
+    .brand-name {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      line-height: 1;
+    }
+
+    .brand-name b {
+      font-family: var(--font-display);
+      font-size: 18px;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+    }
+
+    .brand-name span {
+      color: var(--muted);
+      font-family: var(--font-data);
+      font-size: 9px;
+      letter-spacing: 0.16em;
+    }
+
+    .rail {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .rail-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-family: var(--font-data);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .rail-item b { color: var(--paper); font-weight: 600; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ice); box-shadow: 0 0 10px var(--ice); }
+    .dot.warm { background: var(--sand); box-shadow: 0 0 10px var(--sand); }
+
+    .top-spacer { flex: 1; }
+
+    .lang {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: rgba(0, 0, 0, 0.18);
+    }
+
+    .lang button {
+      border: 0;
+      border-radius: 5px;
+      padding: 5px 9px;
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--font-data);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+    }
+
+    .lang button.is-on { color: #120e06; background: var(--sand); font-weight: 700; }
+
+    /* ------------------------------------------------------------ nav */
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 22px 14px;
+      border-right: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(13, 18, 26, 0.78), rgba(7, 10, 15, 0.56));
+    }
+
+    .nav-label {
+      margin: 0 10px 8px;
+      color: #687486;
+      font-family: var(--font-data);
+      font-size: 9px;
+      letter-spacing: 0.16em;
+    }
+
+    .nav button {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: #a9b3c1;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .nav button:hover { color: var(--paper); background: rgba(255, 255, 255, 0.04); }
+
+    .nav button.is-on {
+      color: var(--paper);
+      border-color: var(--line-strong);
+      background: linear-gradient(90deg, var(--sand-soft), rgba(227, 179, 74, 0.02));
+    }
+
+    .nav button.is-on::before {
+      content: "";
+      position: absolute;
+      left: -14px;
+      top: 8px;
+      bottom: 8px;
+      width: 3px;
+      background: var(--sand);
+      box-shadow: 0 0 16px rgba(227, 179, 74, 0.6);
+    }
+
+    .nav-icon {
+      display: grid;
+      place-items: center;
+      width: 18px;
+      color: currentColor;
+      opacity: 0.8;
+    }
+
+    .nav-icon svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+
+    .nav-note {
+      margin-top: auto;
+      padding: 14px 10px 4px;
+      border-top: 1px solid var(--line);
+      color: #657183;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .nav-note b { display: block; color: #a9b3c1; font-weight: 600; margin-bottom: 4px; }
+
+    /* ----------------------------------------------------------- stage */
+
+    .stage {
+      min-width: 0;
+      overflow: auto;
+      padding: 26px 28px 22px;
+      scrollbar-width: thin;
+      scrollbar-color: #3a4555 transparent;
+    }
+
+    .intro {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .kicker {
+      margin: 0 0 7px;
+      color: var(--sand);
+      font-family: var(--font-data);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+    }
+
+    .intro h1 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(48px, 5.3vw, 78px);
+      font-weight: 700;
+      line-height: 0.84;
+      letter-spacing: 0.005em;
+      text-transform: uppercase;
+      text-shadow: 0 10px 40px rgba(0, 0, 0, 0.55);
+    }
+
+    .intro h1 span {
+      display: block;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(233, 227, 212, 0.5);
+      text-stroke: 1px rgba(233, 227, 212, 0.5);
+    }
+
+    .intro-copy {
+      max-width: 260px;
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+      text-align: right;
+    }
+
+    .match {
+      display: grid;
+      grid-template-columns: minmax(210px, 0.86fr) minmax(330px, 1.5fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .modes {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mode {
+      position: relative;
+      display: grid;
+      grid-template-columns: 34px 1fr auto;
+      align-items: center;
+      gap: 11px;
+      min-height: 78px;
+      padding: 12px 14px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: linear-gradient(110deg, rgba(23, 31, 43, 0.95), rgba(13, 18, 26, 0.82));
+      color: #aab4c2;
+      text-align: left;
+      cursor: pointer;
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 13px), calc(100% - 13px) 100%, 0 100%);
+      transition: transform 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+    }
+
+    .mode:hover { transform: translateX(3px); border-color: rgba(227, 179, 74, 0.35); color: var(--paper); }
+
+    .mode.is-on {
+      color: var(--paper);
+      border-color: rgba(227, 179, 74, 0.62);
+      background: linear-gradient(110deg, rgba(227, 179, 74, 0.17), rgba(227, 179, 74, 0.03) 56%, rgba(13, 18, 26, 0.9));
+    }
+
+    .mode.is-on::after {
+      content: "";
+      position: absolute;
+      right: -26px;
+      top: -24px;
+      width: 100px;
+      height: 100px;
+      border: 1px solid rgba(227, 179, 74, 0.22);
+      transform: rotate(45deg);
+    }
+
+    .mode-glyph {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(227, 179, 74, 0.35);
+      color: var(--sand);
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 700;
+      background: rgba(227, 179, 74, 0.06);
+    }
+
+    .mode-text b { display: block; font-size: 14px; font-weight: 700; letter-spacing: 0.01em; }
+    .mode-text small { display: block; margin-top: 3px; color: var(--muted); font-size: 10.5px; }
+
+    .mode-side {
+      color: #6f7b8c;
+      font-family: var(--font-data);
+      font-size: 9.5px;
+      letter-spacing: 0.06em;
+      text-align: right;
+    }
+
+    .mode.is-on .mode-side { color: var(--sand); }
+
+    .map {
+      position: relative;
+      min-height: 262px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #0a0e14;
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%);
+    }
+
+    .map::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(180deg, transparent 55%, rgba(5, 8, 12, 0.88)),
+        repeating-linear-gradient(0deg, transparent 0 3px, rgba(0, 0, 0, 0.16) 3px 4px);
+    }
+
+    .map svg { display: block; width: 100%; height: 100%; min-height: 262px; }
+
+    .map-copy {
+      position: absolute;
+      z-index: 1;
+      left: 16px;
+      right: 16px;
+      bottom: 14px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .map-name { min-width: 0; }
+    .map-name span {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--ice);
+      font-family: var(--font-data);
+      font-size: 9px;
+      letter-spacing: 0.13em;
+    }
+
+    .map-name b {
+      display: block;
+      overflow: hidden;
+      font-family: var(--font-display);
+      font-size: 27px;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .map-name small { display: block; margin-top: 4px; color: #a4adba; font-size: 10.5px; }
+
+    .map-switch {
+      flex: none;
+      padding: 7px 10px;
+      border: 1px solid rgba(233, 227, 212, 0.24);
+      background: rgba(7, 10, 15, 0.62);
+      color: #d7d1c3;
+      font-family: var(--font-data);
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+    }
+
+    .map-switch:hover { border-color: var(--sand); color: var(--sand); }
+
+    /* ------------------------------------------------------ launch row */
+
+    .rotation { margin-top: 16px; }
+
+    .rotation-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      color: #6f7b8d;
+      font-family: var(--font-data);
+      font-size: 9px;
+      letter-spacing: 0.13em;
+    }
+
+    .rotation-head b { color: var(--sand); font-weight: 400; }
+
+    .rotation-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .rotation-item {
+      position: relative;
+      padding: 10px 12px 10px 15px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: rgba(13, 18, 26, 0.66);
+      color: #aab4c2;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .rotation-item::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--tint, var(--sand));
+      opacity: 0.6;
+    }
+
+    .rotation-item:hover,
+    .rotation-item.is-on { border-color: rgba(227, 179, 74, 0.42); color: var(--paper); }
+    .rotation-item.is-on { background: linear-gradient(90deg, rgba(227, 179, 74, 0.09), rgba(13, 18, 26, 0.7)); }
+    .rotation-item b { display: block; font-size: 12px; font-weight: 600; }
+    .rotation-item small { display: block; margin-top: 3px; color: #758194; font-family: var(--font-data); font-size: 9px; }
+
+    .launch {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 14px;
+      align-items: end;
+      margin-top: 16px;
+    }
+
+    .field {
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      background: rgba(13, 18, 26, 0.74);
+    }
+
+    .field-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 9px;
+      color: #758194;
+      font-family: var(--font-data);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+    }
+
+    .field-label b { color: var(--paper); font-size: 12px; font-weight: 600; letter-spacing: 0; }
+
+    .stepper { display: flex; align-items: center; gap: 10px; }
+
+    .stepper button {
+      width: 27px;
+      height: 27px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--paper);
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .stepper button:hover { border-color: var(--sand); color: var(--sand); }
+
+    .stepper output {
+      min-width: 30px;
+      color: var(--sand);
+      font-family: var(--font-display);
+      font-size: 24px;
+      line-height: 1;
+      text-align: center;
+    }
+
+    .segments { display: flex; gap: 4px; }
+
+    .segments button {
+      flex: 1;
+      padding: 7px 4px;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: #8996a8;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    .segments button.is-on {
+      border-color: rgba(227, 179, 74, 0.5);
+      background: var(--sand-soft);
+      color: var(--sand);
+    }
+
+    .launch-btn {
+      position: relative;
+      min-width: 202px;
+      min-height: 76px;
+      padding: 0 26px;
+      border: 0;
+      background: var(--ember);
+      color: #160a06;
+      font-family: var(--font-display);
+      font-size: 25px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-align: left;
+      cursor: pointer;
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%);
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+
+    .launch-btn span {
+      display: block;
+      margin-top: 3px;
+      font-family: var(--font-data);
+      font-size: 8.5px;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      opacity: 0.7;
+    }
+
+    .launch-btn::after {
+      content: "";
+      position: absolute;
+      right: 18px;
+      top: 50%;
+      width: 10px;
+      height: 10px;
+      border-top: 2px solid currentColor;
+      border-right: 2px solid currentColor;
+      transform: translateY(-50%) rotate(45deg);
+    }
+
+    .launch-btn:hover { filter: brightness(1.12); transform: translateY(-1px); }
+    .launch-btn:active { transform: translateY(1px); }
+
+    /* ------------------------------------------------------------ side */
+
+    .side {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: auto;
+      padding: 22px 18px;
+      border-left: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(13, 18, 26, 0.62), rgba(7, 10, 15, 0.42));
+    }
+
+    .side-block {
+      padding: 13px 14px;
+      border: 1px solid var(--line);
+      background: rgba(10, 14, 21, 0.58);
+    }
+
+    .side-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      color: #6f7b8d;
+      font-family: var(--font-data);
+      font-size: 9px;
+      letter-spacing: 0.13em;
+    }
+
+    .side-title b { color: var(--ice); font-weight: 400; letter-spacing: 0.05em; }
+
+    .cache-bar {
+      display: flex;
+      gap: 3px;
+      height: 7px;
+      margin: 8px 0 7px;
+    }
+
+    .cache-bar i {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .cache-bar i.on { background: var(--sand); }
+    .cache-bar i.on:last-of-type { background: var(--ember); }
+
+    .cache-meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-family: var(--font-data);
+      font-size: 9.5px;
+    }
+
+    .lang-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      color: #a8b2c0;
+      font-size: 11px;
+    }
+
+    .lang-row:first-of-type { border-top: 0; }
+    .lang-row b { font-weight: 400; }
+    .lang-row span { color: #6e7a8b; font-family: var(--font-data); font-size: 9px; }
+
+    .badge {
+      padding: 3px 6px;
+      border: 1px solid rgba(105, 214, 207, 0.3);
+      color: var(--ice);
+      font-family: var(--font-data);
+      font-size: 8.5px;
+      letter-spacing: 0.06em;
+    }
+
+    .badge.sand { color: var(--sand); border-color: rgba(227, 179, 74, 0.35); }
+
+    .controls {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 8px 12px;
+      align-items: center;
+      color: #98a3b3;
+      font-size: 10.5px;
+    }
+
+    .key {
+      min-width: 44px;
+      padding: 4px 5px;
+      border: 1px solid rgba(233, 227, 212, 0.2);
+      background: rgba(255, 255, 255, 0.035);
+      color: #ded8ca;
+      font-family: var(--font-data);
+      font-size: 9px;
+      text-align: center;
+    }
+
+    .tip {
+      margin: 2px 0 0;
+      color: #7e8a9c;
+      font-size: 10.5px;
+      line-height: 1.55;
+    }
+
+    .tip b { color: #c9c2b4; font-weight: 600; }
+
+    /* ---------------------------------------------------------- ticker */
+
+    .ticker {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 0 22px;
+      border-top: 1px solid var(--line);
+      background: rgba(5, 8, 12, 0.74);
+      color: #707c8e;
+      font-family: var(--font-data);
+      font-size: 9px;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .ticker b { color: #aab4c2; font-weight: 400; }
+    .ticker .warm { color: var(--sand); }
+    .ticker-spacer { flex: 1; }
+
+    /* --------------------------------------------------------- feedback */
+
+    .toast {
+      position: fixed;
+      z-index: 20;
+      left: 50%;
+      bottom: 64px;
+      max-width: calc(100vw - 40px);
+      padding: 11px 16px;
+      border: 1px solid rgba(227, 179, 74, 0.45);
+      background: rgba(12, 17, 25, 0.96);
+      color: var(--paper);
+      font-family: var(--font-data);
+      font-size: 10px;
+      letter-spacing: 0.04em;
+      opacity: 0;
+      transform: translate(-50%, 8px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      pointer-events: none;
+    }
+
+    .toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+
+    :focus-visible {
+      outline: 2px solid var(--sand);
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 1080px) {
+      body { overflow: auto; }
+      .shell { height: auto; min-height: 100vh; grid-template-columns: 184px minmax(0, 1fr); grid-template-rows: 56px auto auto 46px; }
+      .side { grid-column: 1 / -1; grid-row: 3; display: grid; grid-template-columns: repeat(3, 1fr); border-left: 0; border-top: 1px solid var(--line); }
+      .ticker { grid-row: 4; }
+    }
+
+    @media (max-width: 760px) {
+      .shell { display: block; }
+      .top { height: 56px; }
+      .rail { display: none; }
+      .nav { flex-direction: row; overflow-x: auto; padding: 10px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .nav-label, .nav-note { display: none; }
+      .nav button { width: auto; white-space: nowrap; }
+      .nav button.is-on::before { display: none; }
+      .stage { overflow: visible; padding: 18px 14px; }
+      .intro { align-items: flex-start; flex-direction: column; gap: 10px; }
+      .intro-copy { max-width: none; text-align: left; }
+      .match { grid-template-columns: 1fr; }
+      .rotation { margin-top: 16px; }
+
+    .rotation-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      color: #6f7b8d;
+      font-family: var(--font-data);
+      font-size: 9px;
+      letter-spacing: 0.13em;
+    }
+
+    .rotation-head b { color: var(--sand); font-weight: 400; }
+
+    .rotation-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .rotation-item {
+      position: relative;
+      padding: 10px 12px 10px 15px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: rgba(13, 18, 26, 0.66);
+      color: #aab4c2;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .rotation-item::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--tint, var(--sand));
+      opacity: 0.6;
+    }
+
+    .rotation-item:hover,
+    .rotation-item.is-on { border-color: rgba(227, 179, 74, 0.42); color: var(--paper); }
+    .rotation-item.is-on { background: linear-gradient(90deg, rgba(227, 179, 74, 0.09), rgba(13, 18, 26, 0.7)); }
+    .rotation-item b { display: block; font-size: 12px; font-weight: 600; }
+    .rotation-item small { display: block; margin-top: 3px; color: #758194; font-family: var(--font-data); font-size: 9px; }
+
+    .launch { grid-template-columns: 1fr; }
+      .launch-btn { min-height: 64px; }
+      .side { display: flex; }
+      .ticker { height: 38px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0.001ms !important;
+        animation-duration: 0.001ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <div class="brand">
+        <span class="brand-mark">UT</span>
+        <span class="brand-name">
+          <b>UT99 WEB</b>
+          <span>LOCAL BUILD / 1999</span>
+        </span>
+      </div>
+
+      <div class="rail">
+        <span class="rail-item"><i class="dot"></i> <b>Ядро</b> не подключено</span>
+        <span class="rail-item"><i class="dot warm"></i> <b>Ассеты</b> 318 / 474 МБ</span>
+        <span class="rail-item"><b>Сеть</b> не требуется</span>
+      </div>
+
+      <span class="top-spacer"></span>
+
+      <div class="lang" aria-label="Язык интерфейса">
+        <button type="button" class="is-on">RU</button>
+        <button type="button">EN</button>
+      </div>
+    </header>
+
+    <aside class="nav" aria-label="Разделы">
+      <p class="nav-label">УПРАВЛЕНИЕ</p>
+
+      <button type="button" class="is-on">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="m8 5 11 7-11 7V5Z"/></svg></span>
+        Быстрый старт
+      </button>
+      <button type="button">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M4 9h16M9 9v10"/></svg></span>
+        Карты
+      </button>
+      <button type="button">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 8l7-5 7 5v8l-7 5-7-5V8Z"/></svg></span>
+        Моды
+      </button>
+      <button type="button">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3.1-6.5 7-6.5s7 2.5 7 6.5"/></svg></span>
+        Профиль
+      </button>
+      <button type="button">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.3 1a7 7 0 0 0-1.7-1L14.5 3h-5L9 6.1a7 7 0 0 0-1.7 1l-2.3-1-2 3.4L5 11a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 1.7 1l.5 3.1h5l.5-3.1a7 7 0 0 0 1.7-1l2.3 1 2-3.4-2-1.5a7 7 0 0 0 .1-1Z"/></svg></span>
+        Настройки
+      </button>
+
+      <div class="nav-note">
+        <b>Первый запуск</b>
+        Данные игры скачаются один раз и останутся в браузере.
+      </div>
+    </aside>
+
+    <main class="stage">
+      <section class="intro">
+        <div>
+          <p class="kicker">1999 / WEB EDITION</p>
+          <h1>Unreal <span>Tournament</span></h1>
+        </div>
+        <p class="intro-copy">
+          Локальная арена без установки. Выберите режим, карту и ботов — остальное уже в кэше браузера.
+        </p>
+      </section>
+
+      <section class="match" aria-label="Быстрый матч">
+        <div class="modes" role="group" aria-label="Режим игры">
+          <button type="button" class="mode is-on" data-mode="dm">
+            <span class="mode-glyph">DM</span>
+            <span class="mode-text"><b>Deathmatch</b><small>Каждый сам за себя</small></span>
+            <span class="mode-side">8 БОТОВ</span>
+          </button>
+          <button type="button" class="mode" data-mode="ctf">
+            <span class="mode-glyph">CTF</span>
+            <span class="mode-text"><b>Capture the Flag</b><small>Захват флага</small></span>
+            <span class="mode-side">2 КОМАНДЫ</span>
+          </button>
+          <button type="button" class="mode" data-mode="dom">
+            <span class="mode-glyph">DOM</span>
+            <span class="mode-text"><b>Domination</b><small>Контроль точек</small></span>
+            <span class="mode-side">3 ТОЧКИ</span>
+          </button>
+        </div>
+
+        <div class="map">
+          <svg viewBox="0 0 680 390" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <defs>
+              <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#091019"/>
+                <stop offset="0.65" stop-color="#111d29"/>
+                <stop offset="1" stop-color="#080c12"/>
+              </linearGradient>
+              <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#1d2b39"/>
+                <stop offset="1" stop-color="#090d14"/>
+              </linearGradient>
+              <radialGradient id="glow" cx="0.5" cy="0.42" r="0.55">
+                <stop offset="0" stop-color="#69d6cf" stop-opacity="0.2"/>
+                <stop offset="1" stop-color="#69d6cf" stop-opacity="0"/>
+              </radialGradient>
+              <pattern id="grid" width="34" height="34" patternUnits="userSpaceOnUse">
+                <path d="M34 0H0V34" fill="none" stroke="#6b8a9b" stroke-opacity="0.16"/>
+              </pattern>
+            </defs>
+
+            <rect width="680" height="390" fill="url(#sky)"/>
+            <ellipse cx="340" cy="172" rx="300" ry="150" fill="url(#glow)"/>
+
+            <g fill="#0c141d" stroke="#263a49" stroke-width="1">
+              <path d="M0 214 96 156 180 214 268 144 352 214 446 150 534 214 620 160 680 206V260H0Z"/>
+              <path d="M0 246 92 214 174 246 266 208 350 246 440 210 528 246 618 214 680 242V274H0Z" fill="#0a1118"/>
+            </g>
+
+            <g stroke="#35546a" stroke-width="1" opacity="0.65">
+              <path d="M52 262 260 148M628 262 420 148M124 286 340 164M556 286 340 164"/>
+            </g>
+
+            <path d="M0 274h680v116H0Z" fill="url(#floor)"/>
+            <path d="M0 274h680v116H0Z" fill="url(#grid)"/>
+
+            <g fill="#17242f" stroke="#3c5e75" stroke-width="1.2">
+              <path d="M76 274h122l-16 54H92Z"/>
+              <path d="M482 274h122l-16 54H498Z"/>
+              <path d="M248 274h184l-18 42H266Z" fill="#101b24"/>
+            </g>
+
+            <g fill="none" stroke="#69d6cf" stroke-width="1.5" opacity="0.75">
+              <path d="M340 118v56M312 146h56"/>
+              <circle cx="340" cy="146" r="18"/>
+            </g>
+
+            <g fill="#e3b34a">
+              <rect x="324" y="266" width="32" height="4" opacity="0.8"/>
+              <rect x="216" y="296" width="16" height="3" opacity="0.55"/>
+              <rect x="448" y="296" width="16" height="3" opacity="0.55"/>
+            </g>
+
+            <g fill="#69d6cf" opacity="0.8">
+              <circle cx="132" cy="240" r="2"/>
+              <circle cx="552" cy="226" r="2"/>
+              <circle cx="376" cy="190" r="1.5"/>
+              <circle cx="286" cy="212" r="1.5"/>
+            </g>
+          </svg>
+
+          <div class="map-copy">
+            <div class="map-name">
+              <span>ТЕКУЩАЯ КАРТА</span>
+              <b id="map-title">DM-Deck16][</b>
+              <small id="map-meta">Стандартная · 8 игроков · Deathmatch</small>
+            </div>
+            <button type="button" class="map-switch" id="map-switch">СМЕНИТЬ КАРТУ</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="rotation" aria-label="Карты в ротации">
+        <div class="rotation-head"><span>В РОТАЦИИ</span><b>3 КАРТЫ</b></div>
+        <div class="rotation-list">
+          <button type="button" class="rotation-item is-on" data-map="dm" style="--tint:#e3b34a">
+            <b>DM-Deck16][</b>
+            <small>Deathmatch · 8 игроков</small>
+          </button>
+          <button type="button" class="rotation-item" data-map="ctf" style="--tint:#69d6cf">
+            <b>CTF-Face</b>
+            <small>Capture the Flag · 2 команды</small>
+          </button>
+          <button type="button" class="rotation-item" data-map="dom" style="--tint:#d9542f">
+            <b>DOM-Condemned</b>
+            <small>Domination · 3 точки</small>
+          </button>
+        </div>
+      </section>      <section class="launch" aria-label="Параметры матча">
+        <div class="field">
+          <div class="field-label"><span>БОТЫ</span><b id="bots-label">8</b></div>
+          <div class="stepper">
+            <button type="button" id="bots-minus" aria-label="Убрать бота">−</button>
+            <output id="bots">8</output>
+            <button type="button" id="bots-plus" aria-label="Добавить бота">+</button>
+            <span style="color:#6f7b8c;font-size:10px">макс. 16</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label"><span>СЛОЖНОСТЬ</span><b>Средняя</b></div>
+          <div class="segments" role="group" aria-label="Сложность">
+            <button type="button">Новичок</button>
+            <button type="button" class="is-on">Средний</button>
+            <button type="button">Жёсткий</button>
+          </div>
+        </div>
+
+        <button type="button" class="launch-btn" id="launch">
+          НАЧАТЬ МАТЧ
+          <span>DM · DECK16 · 8 БОТОВ</span>
+        </button>
+      </section>
+    </main>
+
+    <aside class="side">
+      <section class="side-block">
+        <div class="side-title"><span>ЛОКАЛЬНАЯ КОПИЯ</span><b>318 / 474 МБ</b></div>
+        <div class="cache-bar" aria-hidden="true">
+          <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i>
+          <i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i>
+        </div>
+        <div class="cache-meta"><span>67% в кэше браузера</span><span>докачается при запуске</span></div>
+      </section>
+
+      <section class="side-block">
+        <div class="side-title"><span>ЯЗЫК</span><b>ПАКЕТЫ</b></div>
+        <div class="lang-row"><b>English</b><span>BASE</span></div>
+        <div class="lang-row"><b>Русский</b><span class="badge sand">RU</span></div>
+        <div class="lang-row"><b>Озвучка</b><span>ОТДЕЛЬНО</span></div>
+      </section>
+
+      <section class="side-block">
+        <div class="side-title"><span>СЕССИЯ</span><b>ЛОКАЛЬНО</b></div>
+        <div class="lang-row"><b>Режим</b><span>OFFLINE</span></div>
+        <div class="lang-row"><b>Профиль</b><span>ГОСТЬ</span></div>
+        <div class="lang-row"><b>Версия</b><span>0.1 CONCEPT</span></div>
+      </section>
+
+      <section class="side-block">
+        <div class="side-title"><span>УПРАВЛЕНИЕ</span><b>КЛАВИАТУРА</b></div>
+        <div class="controls">
+          <span class="key">WASD</span><span>движение</span>
+          <span class="key">MOUSE</span><span>обзор и огонь</span>
+          <span class="key">SPACE</span><span>прыжок</span>
+          <span class="key">TAB</span><span>счёт</span>
+        </div>
+      </section>
+
+      <p class="tip"><b>Совет.</b> После первого запуска матч стартует быстрее: тяжёлые пакеты останутся в локальном кэше.</p>
+    </aside>
+
+    <footer class="ticker">
+      <span><b class="warm">DEMO</b> интерфейс без движка</span>
+      <span>WASD движение</span>
+      <span>MOUSE обзор</span>
+      <span>SPACE прыжок</span>
+      <span class="ticker-spacer"></span>
+      <span>UT99 WEB / CONCEPT 01</span>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const modes = {
+        dm: {
+          title: "DM-Deck16][",
+          meta: "Стандартная · 8 игроков · Deathmatch",
+          launch: "DM · DECK16 · 8 БОТОВ",
+          glyph: "DM"
+        },
+        ctf: {
+          title: "CTF-Face",
+          meta: "Стандартная · 2 команды · Capture the Flag",
+          launch: "CTF · FACE · 8 БОТОВ",
+          glyph: "CTF"
+        },
+        dom: {
+          title: "DOM-Condemned",
+          meta: "Стандартная · 3 точки · Domination",
+          launch: "DOM · CONDEMNED · 8 БОТОВ",
+          glyph: "DOM"
+        }
+      };
+
+      const mapTitle = document.getElementById("map-title");
+      const mapMeta = document.getElementById("map-meta");
+      const launch = document.getElementById("launch");
+      const launchText = launch.querySelector("span");
+      const bots = document.getElementById("bots");
+      const botsLabel = document.getElementById("bots-label");
+      const toast = document.getElementById("toast");
+      let currentMode = "dm";
+      let currentLaunch = modes.dm.launch;
+      let toastTimer = 0;
+
+      function showToast(text) {
+        toast.textContent = text;
+        toast.classList.add("is-on");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove("is-on"), 2600);
+      }
+
+      document.querySelectorAll(".mode").forEach((button) => {
+        button.addEventListener("click", () => {
+          currentMode = button.dataset.mode;
+          document.querySelectorAll(".mode").forEach((item) => item.classList.toggle("is-on", item === button));
+          document.querySelectorAll(".rotation-item").forEach((item) => item.classList.toggle("is-on", item.dataset.map === currentMode));
+          const mode = modes[currentMode];
+          mapTitle.textContent = mode.title;
+          mapMeta.textContent = mode.meta;
+          currentLaunch = mode.launch;
+          setBots(Number(bots.textContent));
+          showToast(`Режим: ${button.querySelector("b").textContent}`);
+        });
+      });
+
+      document.querySelectorAll(".segments button").forEach((button) => {
+        button.addEventListener("click", () => {
+          button.parentElement.querySelectorAll("button").forEach((item) => item.classList.toggle("is-on", item === button));
+          showToast(`Сложность: ${button.textContent}`);
+        });
+      });
+
+      function setBots(value) {
+        const next = Math.max(1, Math.min(16, value));
+        bots.textContent = String(next);
+        botsLabel.textContent = String(next);
+        launchText.textContent = currentLaunch.replace(/\d+ БОТОВ?/, `${next} БОТОВ`);
+      }
+
+      document.getElementById("bots-minus").addEventListener("click", () => setBots(Number(bots.textContent) - 1));
+      document.getElementById("bots-plus").addEventListener("click", () => setBots(Number(bots.textContent) + 1));
+
+      document.querySelectorAll(".rotation-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          document.querySelector(`.mode[data-mode="${item.dataset.map}"]`)?.click();
+        });
+      });
+
+      document.getElementById("map-switch").addEventListener("click", () => {
+        showToast("Выбор карт появится на следующем экране");
+      });
+
+      launch.addEventListener("click", () => {
+        showToast("Это макет: движок ещё не подключён");
+      });
+
+      document.querySelectorAll(".nav button").forEach((button) => {
+        button.addEventListener("click", () => {
+          if (button.classList.contains("is-on")) return;
+          showToast(`${button.textContent.trim()} — раздел в разработке`);
+        });
+      });
+
+      document.querySelectorAll(".lang button").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".lang button").forEach((item) => item.classList.toggle("is-on", item === button));
+          showToast(button.textContent === "RU" ? "Русский пакет ещё не подключён" : "English base");
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

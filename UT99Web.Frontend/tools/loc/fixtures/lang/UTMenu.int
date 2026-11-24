@@ -1,0 +1,8 @@
+; Тестовая фикстура, не игровые данные
+[UTMenu.Menu]
+Play=Играть
+Quit=Выход
+
+[UTMenu.Settings]
+Video=Видео
+Extra=Лишнее

@@ -1,0 +1,177 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UT99Web — Three.js</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #05080c; color: #dbe8f5; font-family: "Consolas", "Lucida Console", monospace; }
+  #view { display: block; width: 100vw; height: 100vh; }
+  #status { display: none; }
+  #hud { position: fixed; inset: 0; z-index: 5; pointer-events: none; font-family: "Consolas", "Lucida Console", monospace; }
+  .hud-top { position: absolute; right: 14px; top: 7px; display: flex; align-items: center; gap: 16px; }
+  .hud-stat { display: flex; align-items: center; gap: 6px; color: #ff4b48; text-shadow: 0 1px 4px #000, 0 0 8px rgba(255, 30, 20, .55); }
+  .hud-stat b { font-size: 20px; line-height: 1; color: #ff4b48; }
+  .hud-icon { position: relative; width: 22px; height: 22px; display: inline-block; flex: none; }
+  .hud-icon.health::before, .hud-icon.health::after { content: ""; position: absolute; background: #ff3b38; box-shadow: 0 0 6px rgba(255, 40, 30, .5); }
+  .hud-icon.health::before { left: 7px; top: 1px; width: 8px; height: 20px; }
+  .hud-icon.health::after { left: 1px; top: 7px; width: 20px; height: 8px; }
+  .hud-icon.armor { background: #ff3b38; clip-path: polygon(50% 0, 86% 20%, 78% 70%, 50% 100%, 22% 70%, 14% 20%); box-shadow: 0 0 8px rgba(255, 40, 30, .5); }
+  .hud-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 58px; background: linear-gradient(0deg, rgba(70, 0, 0, .82), rgba(35, 0, 0, .38)); border-top: 1px solid rgba(255, 70, 50, .38); box-shadow: 0 -3px 14px rgba(0, 0, 0, .45); }
+  .hud-rank { position: absolute; left: 18px; bottom: 9px; color: #fff; text-shadow: 0 1px 6px #000; }
+  .hud-rank b { display: block; font-size: 22px; line-height: 1; color: #fff; }
+  .hud-rank span { display: block; margin-top: 3px; font-size: 9px; letter-spacing: .06em; color: #ff6b5a; }
+  .hud-weapons { position: absolute; left: 50%; bottom: 5px; transform: translateX(-50%); display: flex; gap: 2px; }
+  .hud-slot { width: 30px; height: 42px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; border: 1px solid transparent; background: transparent; color: #c9a99b; }
+  .hud-slot .key { font-size: 9px; line-height: 1; color: #ff6b5a; }
+  .hud-slot .name { max-width: 28px; font-size: 6px; line-height: 1.05; letter-spacing: .01em; text-align: center; overflow: hidden; }
+  .hud-slot.is-active { border-color: rgba(255, 80, 60, .75); background: rgba(190, 30, 20, .42); color: #fff; box-shadow: 0 0 8px rgba(255, 40, 30, .35); }
+  .hud-slot.is-empty { opacity: .25; }
+  .hud-ammo { position: absolute; right: 16px; bottom: 7px; min-width: 58px; height: 40px; padding: 0 10px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255, 55, 45, .75); border-radius: 3px; background: rgba(42, 0, 0, .55); color: #ff4b48; font-size: 24px; line-height: 1; text-shadow: 0 0 8px rgba(255, 40, 30, .5); }
+  .hud-weapon-name { display: none; }
+  #crosshair { position: fixed; left: 50%; top: 50%; z-index: 6; width: 12px; height: 12px; transform: translate(-50%, -50%); pointer-events: none; }
+  #crosshair i { position: absolute; display: block; background: #56ff6b; box-shadow: 0 0 3px #56ff6b; }
+  #crosshair i:nth-child(1) { left: 0; top: 5px; width: 3px; height: 2px; }
+  #crosshair i:nth-child(2) { right: 0; top: 5px; width: 3px; height: 2px; }
+  #crosshair i:nth-child(3) { left: 5px; top: 0; width: 2px; height: 3px; }
+  #crosshair i:nth-child(4) { left: 5px; bottom: 0; width: 2px; height: 3px; }
+  #crosshair b { position: absolute; left: 5px; top: 5px; width: 2px; height: 2px; background: #56ff6b; box-shadow: 0 0 3px #56ff6b; }
+  #pickup-note { position: fixed; left: 50%; top: 20%; z-index: 6; transform: translateX(-50%); opacity: 0; transition: opacity .25s; color: #f2cc63; font-size: 17px; letter-spacing: .06em; text-shadow: 0 2px 12px #000; pointer-events: none; }
+  #hint { display: none; }
+  #audio-hint { position: fixed; left: 50%; top: 58%; z-index: 6; transform: translateX(-50%); color: #8fa6b8; font-size: 11px; letter-spacing: .12em; text-shadow: 0 2px 8px #000; pointer-events: none; }
+  #menu { position: fixed; inset: 0; z-index: 20; display: none; place-items: center; background: radial-gradient(circle at 50% 20%, rgba(120,20,20,.28), transparent 45%), linear-gradient(160deg,#05080c,#0b1118 55%,#030507); }
+  #menu.is-on { display: grid; }
+  .menu-shell { width: min(1040px,94vw); border: 1px solid #3d4c5c; background: linear-gradient(180deg,rgba(17,26,36,.97),rgba(7,11,16,.99)); box-shadow: 0 24px 80px rgba(0,0,0,.8); }
+  .menu-head { padding: 22px 28px 16px; border-bottom: 1px solid #2c3946; background: linear-gradient(90deg,rgba(120,24,24,.35),transparent 65%); }
+  .menu-title { font-size: 30px; letter-spacing: .22em; color: #f3d58a; }
+  .menu-sub { margin-top: 6px; font-size: 13px; letter-spacing: .28em; color: #8ca8c0; }
+  .menu-body { display: grid; grid-template-columns: 1.2fr .8fr; gap: 20px; padding: 20px 28px 26px; }
+  .menu-body h3 { margin: 0 0 10px; font-size: 12px; letter-spacing: .2em; color: #f2cc63; text-transform: uppercase; }
+  #menu-map-list { height: 430px; overflow: auto; border: 1px solid #2b3947; background: rgba(0,0,0,.35); }
+  .menu-map { display: flex; justify-content: space-between; width: 100%; padding: 9px 12px; border: 0; border-bottom: 1px solid #1d2833; background: transparent; color: #b9c9d8; font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+  .menu-map:hover { background: rgba(80,120,160,.16); color: #fff; }
+  .menu-map.is-active { background: linear-gradient(90deg,rgba(180,50,40,.42),rgba(70,90,110,.12)); color: #ffe1a8; }
+  .menu-map small { color: #70889d; }
+  .menu-side { display: flex; flex-direction: column; gap: 12px; }
+  .menu-mode { padding: 10px 12px; border: 1px solid #2b3947; background: rgba(0,0,0,.28); color: #c5d4e2; font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+  .menu-mode.is-active { border-color: #b5453d; background: rgba(150,40,32,.3); color: #ffe0a3; }
+  .menu-preview { border: 1px solid #2b3947; padding: 12px; background: rgba(0,0,0,.28); min-height: 74px; }
+  .menu-preview b { display: block; color: #f2cc63; font-size: 16px; }
+  .menu-preview span { display: block; margin-top: 6px; color: #8ca8c0; font-size: 12px; }
+  #menu-start { margin-top: auto; padding: 14px 18px; border: 1px solid #d8a84e; background: linear-gradient(180deg,#a63a30,#6d1f1b); color: #ffe6b0; font: inherit; font-size: 15px; letter-spacing: .16em; cursor: pointer; }
+  .menu-settings { padding: 11px 18px; border: 1px solid #2b3947; background: rgba(0, 0, 0, .28); color: #c5d4e2; font: inherit; font-size: 13px; letter-spacing: .14em; cursor: pointer; }
+  .menu-settings:hover { border-color: #d8a84e; color: #ffe0a3; }
+  .menu-hint { color: #647b90; font-size: 11px; line-height: 1.6; }
+  #pause { position: fixed; inset: 0; z-index: 12; display: none; place-items: center; text-align: center; color: #dbe8f5; font-family: "Consolas", monospace; pointer-events: auto; background: rgba(3, 7, 11, .72); text-shadow: 0 2px 10px #000; }
+  #pause.is-on { display: grid; }
+  #pause .pause-card { width: min(420px, 90vw); padding: 26px 28px 24px; border: 1px solid #3d4c5c; background: linear-gradient(180deg, rgba(17, 26, 36, .98), rgba(7, 11, 16, .99)); box-shadow: 0 24px 80px rgba(0, 0, 0, .8); }
+  #pause b { display: block; font-size: 30px; letter-spacing: .18em; color: #f2cc63; }
+  #pause p { margin: 8px 0 0; font-size: 13px; letter-spacing: .06em; }
+  #pause .pause-hint { color: #70889d; font-size: 11px; letter-spacing: .08em; }
+  .pause-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
+  .pause-actions button { padding: 11px 14px; border: 1px solid #2b3947; background: rgba(0, 0, 0, .35); color: #c5d4e2; font: inherit; font-size: 13px; letter-spacing: .14em; cursor: pointer; }
+  .pause-actions button:hover { border-color: #d8a84e; color: #ffe0a3; }
+  .pause-actions #pause-resume { border-color: #b5453d; background: rgba(150, 40, 32, .3); color: #ffe0a3; }
+  #settings { position: fixed; inset: 0; z-index: 22; display: none; place-items: center; background: rgba(3, 7, 11, .82); color: #dbe8f5; font-family: "Consolas", monospace; text-shadow: 0 2px 10px #000; }
+  #settings.is-on { display: grid; }
+  .settings-card { width: min(560px, 92vw); max-height: 92vh; overflow: auto; padding: 24px 28px 22px; border: 1px solid #3d4c5c; background: linear-gradient(180deg, rgba(17, 26, 36, .98), rgba(7, 11, 16, .99)); box-shadow: 0 24px 80px rgba(0, 0, 0, .8); }
+  .settings-card > b { display: block; margin-bottom: 18px; font-size: 26px; letter-spacing: .18em; color: #f2cc63; }
+  .settings-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px 14px; margin-bottom: 16px; font-size: 12px; letter-spacing: .12em; color: #a8c0d6; }
+  .settings-row output { color: #f2cc63; font-size: 13px; }
+  .settings-row input[type="range"] { grid-column: 1 / -1; width: 100%; accent-color: #b5453d; }
+  .settings-row select { grid-column: 1 / -1; padding: 8px 10px; border: 1px solid #2b3947; background: rgba(0, 0, 0, .35); color: #c5d4e2; font: inherit; font-size: 13px; }
+  .settings-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .settings-actions button { flex: 1; padding: 11px 14px; border: 1px solid #2b3947; background: rgba(0, 0, 0, .35); color: #c5d4e2; font: inherit; font-size: 12px; letter-spacing: .12em; cursor: pointer; }
+  .settings-actions button:hover { border-color: #d8a84e; color: #ffe0a3; }
+  .settings-actions #settings-close { border-color: #b5453d; background: rgba(150, 40, 32, .3); color: #ffe0a3; }
+  #death { position: fixed; inset: 0; z-index: 30; display: none; place-items: center; text-align: center; background: radial-gradient(circle, rgba(120,0,0,.65), rgba(20,0,0,.92)); font-family: "Consolas", monospace; color: #ffe8e8; pointer-events: none; }
+  #death.is-on { display: grid; }
+  #death b { display: block; font-size: 34px; letter-spacing: .14em; color: #ffd4d4; }
+  #death p { margin: 12px 0 0; font-size: 15px; letter-spacing: .1em; }
+  #death .prompt { margin-top: 24px; color: #f2cc63; font-size: 18px; }
+  #match-end { position: fixed; inset: 0; z-index: 31; display: none; place-items: center; background: radial-gradient(circle at 50% 25%, rgba(120, 30, 20, .35), transparent 55%), rgba(3, 7, 11, .9); color: #dbe8f5; font-family: "Consolas", monospace; text-shadow: 0 2px 10px #000; }
+  #match-end.is-on { display: grid; }
+  .match-card { width: min(560px, 92vw); padding: 26px 28px 24px; border: 1px solid #3d4c5c; background: linear-gradient(180deg, rgba(17, 26, 36, .98), rgba(7, 11, 16, .99)); box-shadow: 0 24px 80px rgba(0, 0, 0, .85); text-align: center; }
+  .match-card > b { display: block; font-size: 34px; letter-spacing: .2em; color: #f2cc63; }
+  #match-end-sub { margin: 8px 0 0; color: #9fc6e8; font-size: 13px; letter-spacing: .08em; }
+  .match-score { margin-top: 20px; border: 1px solid #2b3947; background: rgba(0, 0, 0, .35); text-align: left; }
+  .score-row { display: grid; grid-template-columns: 34px 1fr 70px 70px; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #1d2833; font-size: 13px; }
+  .score-row:last-child { border-bottom: 0; }
+  .score-row span:nth-child(3), .score-row span:nth-child(4) { text-align: right; }
+  .score-row.score-head { color: #70889d; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; background: rgba(8, 15, 22, .75); }
+  .score-row.is-player { color: #ffe0a3; background: rgba(150, 40, 32, .24); }
+  .match-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .match-actions button { flex: 1; padding: 12px 14px; border: 1px solid #2b3947; background: rgba(0, 0, 0, .35); color: #c5d4e2; font: inherit; font-size: 13px; letter-spacing: .14em; cursor: pointer; }
+  .match-actions button:hover { border-color: #d8a84e; color: #ffe0a3; }
+  .match-actions #match-rematch { border-color: #b5453d; background: rgba(150, 40, 32, .3); color: #ffe0a3; }
+  @media (max-width: 760px) { .menu-body { grid-template-columns: 1fr; } #menu-map-list { height: 220px; } }
+</style>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="status"><b>THREE.JS PORT</b><br><span id="info">loading…</span></div>
+<div id="hint">LMB — look · WASD — move · Shift — run · wheel — zoom · V — walk · O — orbit · Esc — pause · F — fullscreen</div>
+<div id="pickup-note"></div>
+<div id="hud">
+  <div class="hud-top">
+    <div class="hud-stat"><span class="hud-icon health"></span><b id="hud-health">100</b></div>
+    <div class="hud-stat"><span class="hud-icon armor"></span><b id="hud-armor">0</b></div>
+  </div>
+  <div class="hud-bar">
+    <div class="hud-rank"><b id="hud-rank">1st</b><span id="hud-frags">0 / 20 frags</span></div>
+    <div id="hud-weapons" class="hud-weapons"></div>
+    <div class="hud-ammo"><b id="hud-ammo">30</b></div>
+  </div>
+</div>
+<div id="crosshair"><i></i><i></i><i></i><i></i><b></b></div>
+<div id="pause"><div class="pause-card"><b>PAUSED</b><p id="pause-info">X 0 / Y 0 / Z 0</p><div class="pause-actions"><button id="pause-resume" type="button">RESUME</button><button id="pause-settings" type="button">SETTINGS</button><button id="pause-restart" type="button">RESTART</button><button id="pause-menu" type="button">MAIN MENU</button></div><p class="pause-hint">Esc / P — resume</p></div></div>
+<div id="settings">
+  <div class="settings-card">
+    <b>SETTINGS</b>
+    <div class="settings-row"><label for="settings-sensitivity">MOUSE SENSITIVITY</label><output id="settings-sensitivity-value" for="settings-sensitivity">1.00</output><input id="settings-sensitivity" type="range" min="0.2" max="3" step="0.05" value="1"></div>
+    <div class="settings-row"><label for="settings-quality">RENDER QUALITY</label><select id="settings-quality"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></div>
+    <div class="settings-row"><label for="settings-volume">MASTER VOLUME</label><output id="settings-volume-value" for="settings-volume">80%</output><input id="settings-volume" type="range" min="0" max="1" step="0.05" value="0.8"></div>
+    <div class="settings-row"><label for="settings-music-volume">MUSIC VOLUME</label><output id="settings-music-volume-value" for="settings-music-volume">35%</output><input id="settings-music-volume" type="range" min="0" max="1" step="0.05" value="0.35"></div>
+    <div class="settings-actions"><button id="settings-fullscreen" type="button">FULLSCREEN</button><button id="settings-close" type="button">BACK</button></div>
+  </div>
+</div>
+<div id="death"><div><b>YOU WERE KILLED</b><p id="death-stats">Health 0</p><p class="prompt">CLICK TO RESPAWN</p></div></div>
+<div id="match-end">
+  <div class="match-card">
+    <b id="match-end-title">VICTORY</b>
+    <p id="match-end-sub"></p>
+    <div id="match-score" class="match-score"></div>
+    <div class="match-actions"><button id="match-rematch" type="button">REMATCH</button><button id="match-menu" type="button">MAIN MENU</button></div>
+  </div>
+</div>
+<div id="menu">
+  <div class="menu-shell">
+    <div class="menu-head"><div class="menu-title">UNREAL TOURNAMENT</div><div class="menu-sub">DEATHMATCH / THREE.JS PORT</div></div>
+    <div class="menu-body">
+      <div><h3>Select Map</h3><div id="menu-map-list"></div></div>
+      <div class="menu-side">
+        <h3>Game Mode</h3>
+        <div class="menu-modes">
+          <button class="menu-mode is-active" data-mode="walk">Deathmatch / Explore</button>
+          <button class="menu-mode" data-mode="fly">Fly</button>
+          <button class="menu-mode" data-mode="orbit">Orbit Viewer</button>
+        </div>
+        <div class="menu-preview"><b id="menu-map-title">DM-Deck16][</b><span id="menu-map-info">Deathmatch</span></div>
+        <button id="menu-settings" type="button" class="menu-settings">SETTINGS</button>
+        <button id="menu-start">START</button>
+        <div class="menu-hint">WASD — move · mouse — look · V — walk · O — orbit · Esc — pause · F — fullscreen</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module" src="./viewer.js?v=16"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+

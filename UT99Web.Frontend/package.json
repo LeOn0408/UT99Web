@@ -1,0 +1,24 @@
+{
+  "name": "ut99web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tools/assets/uz.test.mjs engine/tests/package-real.test.mjs engine/tests/model-real.test.mjs engine/tests/texture-real.test.mjs engine/tests/mesh-real.test.mjs engine/tests/mesh-bundle.test.mjs engine/tests/collision.test.mjs engine/tests/bots.test.mjs engine/tests/audio.test.mjs engine/tests/score.test.mjs web/settings.test.mjs",
+    "test:all": "npm test",
+    "test:deep": "node --test web/settings.test.mjs engine/tests/score.test.mjs tools/loc/loc.test.mjs tools/assets/uz.test.mjs engine/tests/package-reader.test.mjs engine/tests/package-real.test.mjs engine/tests/model-real.test.mjs engine/tests/texture-real.test.mjs engine/tests/collision.test.mjs engine/tests/bots.test.mjs engine/tests/audio.test.mjs engine/tests/audio-events.test.mjs engine/tests/level-info.test.mjs engine/tests/uscript-real.test.mjs engine/tests/uscript-source.test.mjs engine/tests/mesh-real.test.mjs engine/tests/mesh-bundle.test.mjs",
+    "dev": "node server.mjs",
+    "dev:node": "node tools/serve.mjs",
+    "dev:frontend": "node server.mjs",
+    "smoke:viewer": "node tools/smoke/viewer.mjs",
+    "smoke:viewmodels": "node tools/smoke/viewmodels.mjs",
+    "build:meshes": "node tools/uscript/build-meshes.mjs",
+    "build:audio": "node tools/assets/build-audio.mjs",
+    "build:music": "node tools/assets/build-music.mjs",
+    "loc:extract": "node tools/loc/cli.mjs extract",
+    "loc:validate": "node tools/loc/cli.mjs validate",
+    "loc:build": "node tools/loc/cli.mjs build"
+  },
+  "dependencies": {
+    "three": "^0.180.0"
+  }
+}
